@@ -2,9 +2,10 @@
 
 # Deploy a Locust load generator in ECS using CDK Python 
 
-This lab walks you through creating a CDK project in Python that will create a 
-customised Locust container image, and all supporting service configuration.
-Including: VPC, ECS cluster, ECS Service, and a CloudWatch dashboard.
+This lab walks you through creating a CDK project in Python that will implement 
+an ECS Service running [Locust.io](locust.io). Using CDK constructs 
+we'll create a customised Locust container image, and all supporting service configuration, including: VPC, 
+ECS cluster, ECS Service, Application Load Balancer, and a CloudWatch dashboard.
 
 ## Getting Started
 
@@ -177,13 +178,12 @@ defining a task definition
 ```
 
 Now we'll add a container to run in our task. This container definition creates 
-a new container image based on a DOCKERFILE and accompanying locust.py file in 
-the lab/locust directory. CDK will then upload this to an ECR repository that it 
-creates automatically.
+a new container image based on a DOCKERFILE which references the official Locust.io 
+image on Dockerhub and accompanying locust.py file in the ```/locust``` directory. 
+CDK will then upload this to an ECR repository that it creates automatically.
 
 We also set the environment variables that Locust requires to initialise here.
 
-**todo: Running without env... Also, need to pull dockerfile and locust file from parent**
 ```
         locust_container = task_def.add_container(
             "locustContainer",
