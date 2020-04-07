@@ -3,7 +3,7 @@
 # Deploy a Locust load generator in ECS using CDK Python 
 
 This lab walks you through creating a CDK project in Python that will implement 
-an ECS Service running [Locust.io](locust.io). Using CDK constructs 
+an ECS Service running [Locust.io](https://locust.io/). Using CDK constructs 
 we'll create a customised Locust container image, and all supporting service configuration, including: VPC, 
 ECS cluster, ECS Service, Application Load Balancer, and a CloudWatch dashboard.
 
@@ -12,7 +12,9 @@ ECS cluster, ECS Service, Application Load Balancer, and a CloudWatch dashboard.
 Go to Cloud9 on the AWS Web console - this is your IDE in the cloud. 
 
 On top right corner - Switch to the correct region
-on the left hand pane click on Your environments
+
+On the left hand pane click on Your environments
+
 Open the python_cdk_locust environment in Cloud9
 
 ![Cloud9 Environments](images/Cloud9_Envs.png)
@@ -33,7 +35,7 @@ Open a terminal tab in Cloud9 by clicking the + and selecting New Terminal
 
 1. Enter the lab directory and create a new directory for your work 
 ```
-cd python-cdk-locust-lab
+cd python-cdk-locust
 mkdir lab
 cd lab
 ```
@@ -55,23 +57,24 @@ Open the app.py file in Cloud9, and add an environment paramater to the stack
 instantiation. If you're deploying into a different account, you can set that 
 here too
 ```
-PythonCdkLocustLabStack(app, "python-cdk-locust-lab",
+LabStack(app, "lab",
     env={'region': 'ap-southeast-2'}
 )
 ```
 **Remember to save your files after each step!**
 
 ## Step 3: Define your python dependencies
-Using Cloud9, create a file named requirements.txt in your lab directory, add 
+Open the file named requirements.txt in your lab directory, replace the contents with 
 the following, and save it. This file defines the Python dependencies that our 
 lab will use. 
 ```
 aws-cdk.core
 aws-cdk.aws_ec2
 aws-cdk.aws_ecs
+aws-cdk.aws_ecs_patterns
 aws-cdk.aws_cloudwatch
 ```
-Open your CDK Stack lab/lab.py in Cloud9 and replace the first line with the following
+Open your CDK Stack lab/lab_stack.py in Cloud9 and replace the first line with the following
 to import the CDK libraries.
 
 ```
@@ -109,6 +112,8 @@ independently of the Pattern.
 
 ## Step 4: Create an ECS Cluster
 
+*All code changes for the rest of the lab will be done in the file lab/lab_stack.py*
+
 Create an ECS cluster and add an instance to it. If we had specific requirements
 around the VPC configuration, we could have created a fresh one first, and passed
 it to the ECS cluster via the ```vpc``` parameter. Instead, we'll just let the 
@@ -127,7 +132,9 @@ ECS construct create it for us.
         
 ```
 
-**todo: Add a screenshot**
+*todo: Replace this screenshot!*
+
+![First stack edit](images/Cloud9_FristStackEdit.png)
 
 As you progress, you can test that your code generates valid CloudFormation by 
 running ```cdk synth``` But before you do this, you need to activate your python 
@@ -135,13 +142,15 @@ virtualenv and install your dependencies.
 
 ```
 source .env/bin/activate
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 ***Every time you work on your CDK project, you'll need to activate your virtualenv***
 
 Now run ``` cdk synth``` to synthesize your CloudFormation template. You should 
-see a CloudFormation template defining your ECS cluster and its dependecies
+see a CloudFormation template several hunderd lines long defining your ECS 
+cluster and its dependecies. 
+If you only see a metadata resource, you've forgotten to save you lab_stack.py file.
 
 
 ```
@@ -200,26 +209,28 @@ We also set the environment variables that Locust requires to initialise here.
 ## Step 6: Define a service
 
 Now that we've created all of the underlying components, it's time to put them
-together into a service and run it on our ECS cluster.
+together into a service and run it on our ECS cluster. For this we'll use an ECS
+Pattern construct which not only creates the service, but automatically puts it 
+behind an Applicaion Load Balancer for us. 
 ```
-        locust_service = ecs.Ec2Service(
-            self, "locustService",
-            cluster = loadgen_cluster,
-            task_definition = task_def,
-            security_group = security_group,
-            desired_count = 1
+        Service = ecs_patterns.ApplicationLoadBalancedEc2Service(self, "Locust", 
+            memory_reservation_mib=512, 
+            task_definition=task_def, 
+            cluster=loadgen_cluster
         )
 ```
 
 
-As we're using a Pattern, CDK takes care of the rest of the details. 
+As we're using a Pattern, that's all that is requires, as CDK uses the pattern to 
+take care of the rest of the details. 
 
 Run ```cdk diff``` to see what changes this will make to the CloudFormation that CDK
 will generate and deploy.
 
-Now deploy your stack using ```cdk deploy``` and when that completes, go to the 
-LocustServiceURL which is output at the end of the deploy process in a web 
-browser. You should see your Locust load generator page
+Now deploy your stack using ```cdk deploy``` - it should take about 5 minutes to 
+deploy. When that completes, in a web browser go to the LocustServiceURL which 
+is output at the end of the deploy process. You should see your Locust load 
+generator page.
 
 ## Oops! We need a bigger instance!
 
