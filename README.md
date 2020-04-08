@@ -246,6 +246,37 @@ Obviously, just having our service running is not enough, we need to monitor its
 operation. Let's create a simple CloudWatch Dashboard to monitor a couple of 
 metrics for our service. 
 
+Again, we can take advantage of the abstractions built into the CDK constructs. 
+We'll build a new dashboard and add graph widgets for both the ECS cluster and 
+ALB.Start by creating the graph widgets based on metric objects which are properties
+of our ECS Cluster and ALB 
+
+```
+        #Create a graph widget to track reservation metrics for our cluster
+        ecs_widget = cw.GraphWidget(
+            left = [loadgen_cluster.metric_cpu_reservation()], 
+            right = [ loadgen_cluster.metric_memory_reservation()],
+            title = "ECS - CPU and Memory Reservation",
+            )
+        
+        
+        # Create a graph widget for ALB
+        alb_widget = cw.GraphWidget(
+            left = [locust_service.load_balancer.metric_request_count()],
+            right = [locust_service.load_balancer.metric_processed_bytes()],
+            title = "ALB - Requests and Throughput"
+        )
+```
+
+Now, we'll add them to a dashboard
+
+```
+        dashboard = cw.Dashboard(self, "Locustdashboard")
+        dashboard.add_widgets(ecs_widget)
+        dashboard.add_widgets(alb_widget)
+```
+
+Save your file, and deploy the changes using ```cdk deploy```
 
 ## Cleanup
 
