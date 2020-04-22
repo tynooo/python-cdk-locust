@@ -7,15 +7,39 @@ an ECS Service running [Locust.io](https://locust.io/). Using CDK constructs
 we'll create a customised Locust container image, and all supporting service configuration, including: VPC, 
 ECS cluster, ECS Service, Application Load Balancer, and a CloudWatch dashboard.
 
+## How much will this lab cost?
+Base costs will be:
+* Cloud9 instance
+* NAT GW
+* Locust Instance
+* Elastic Container Registry - Container storage
+
+However, if you're eligible for [Free Tier](https://aws.amazon.com/free) and 
+you select t3.micro instance type, your Locust instance will be free. 
+
+
 ## Getting Started
 
-Go to Cloud9 on the AWS Web console - this is your IDE in the cloud. 
+In order to run this lab, you'll need a development environment with Python3 and
+CDK installed, and your AWS account bootstrapped for CDK. If you alread have this,
+please skip to Step 1.
 
-On top right corner - Switch to the correct region
+First, open the Cloud9 console in the region in which you will complete this lab
+and create a new Environment.On the next screen, give it an appropriate name and
+hit "Next Step"
 
-On the left hand pane click on Your environments
+![Cloud9 Name](/images/Cloud9_Create.png)
 
-Open the python_cdk_locust environment in Cloud9
+On the next page, select your instance size, keeping in mind that larger instance 
+types will have a cost associated with them. Then hit "Next Step"
+
+![Cloud9 Settings](/images/Cloud9_Settings.png)
+
+Then review your settings and hit "Create Environment"
+
+Once your Cloud9 development environment is created, it will open the IDE. 
+Whenever you need to get back into your IDE, just go to the Cloud9 console, and
+click "Open IDE" on your Environment. 
 
 ![Cloud9 Environments](images/Cloud9_Envs.png)
 
@@ -254,10 +278,10 @@ of our ECS Cluster and ALB
 ```
         #Create a graph widget to track reservation metrics for our cluster
         ecs_widget = cw.GraphWidget(
-            left = [loadgen_cluster.metric_cpu_reservation()], 
-            right = [ loadgen_cluster.metric_memory_reservation()],
-            title = "ECS - CPU and Memory Reservation",
-            )
+            left = [locust_service.metric_cpu_utilization()], 
+            right = [locust_service.metric_memory_utilization()],
+            title = "ECS Service - CPU and Memory Reservation",
+            
         
         
         # Create a graph widget for ALB
