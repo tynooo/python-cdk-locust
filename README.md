@@ -14,7 +14,7 @@ Base costs will be ( $USD in ap-southeast-2):
 * Elastic Container Registry - Container storage
 * S3 - Used by CDK to store intermediate objects that CDK creates 
 
-* You will need to manually delete resources in S3 and ECR after the lab *
+*You will need to manually delete resources in S3 and ECR after the lab*
 
 However, if you're eligible for [Free Tier](https://aws.amazon.com/free) and 
 you select t3.micro instance type, your Cloud9 and Locust instances will be free. 
