@@ -13,12 +13,15 @@ Base costs will be:
 * NAT GW
 * Locust Instance
 * Elastic Container Registry - Container storage
+* S3 - Used by CDK to store intermediate objects that CDK creates 
+
+* You will need to manually delete resources in S3 and ECR after the lab *
 
 However, if you're eligible for [Free Tier](https://aws.amazon.com/free) and 
 you select t3.micro instance type, your Locust instance will be free. 
 
 
-## Getting Started
+## Step 0: Getting Started
 
 In order to run this lab, you'll need a development environment with Python3 and
 CDK installed, and your AWS account bootstrapped for CDK. If you alread have this,
@@ -43,27 +46,34 @@ click "Open IDE" on your Environment.
 
 ![Cloud9 Environments](images/Cloud9_Envs.png)
 
-## Step 1: Initialise a CDK project
 
-**todo:** 
-1. How will these be hosted? 
-2. Do we neeed to install CDK?
-3. Add git clone to grab dependecies (dockerfile and locust.py)
+Cloud9 comes with Python3 and CDK installed by default!
 
-**/todo**
+
+## Step 1: Clone lab resources and Initialise a CDK project
+
 
 
 Open a terminal tab in Cloud9 by clicking the + and selecting New Terminal
 
 ![Cloud9 New Terminal](images/Cloud9_Term.png)
 
-1. Enter the lab directory and create a new directory for your work 
+
+1. clone the lab resources into a local directory.
+```
+git clone https://github.com/tynooo/python-cdk-locust
+```
+This will create a local copy of this repository that includes this README, and 
+the Dockerfile and locust test file that we'll use. 
+
+
+2. Enter the lab directory and create a new directory for your work 
 ```
 cd python-cdk-locust
 mkdir lab
 cd lab
 ```
-2. Initialise your CDK project
+3. Initialise your CDK project
 ```
 cdk init --language python
 ```
@@ -75,11 +85,15 @@ stack(s) that will be created
 the CDK libraries that we will use
  * lab/lab.py - The file that defines the CDK stack
 
+You can learn more about CDK from this 
+[Blog post](https://aws.amazon.com/blogs/developer/getting-started-with-the-aws-cloud-development-kit-and-python/)
+or from the [CDK Developer Guide](https://docs.aws.amazon.com/cdk/latest/guide/home.html)
+
  
 ## Step 2: Set the region that our stack will deploy into
 Open the app.py file in Cloud9, and add an environment paramater to the stack
 instantiation. If you're deploying into a different account, you can set that 
-here too
+here too with the "account" property.
 ```
 LabStack(app, "lab",
     env={'region': 'ap-southeast-2'}
@@ -151,14 +165,12 @@ ECS construct create it for us.
         
         loadgen_cluster.add_capacity("Asg",
             desired_capacity=1,
-            instance_type=ec2.InstanceType("t3.large"),
+            instance_type=ec2.InstanceType("t3.micro"),
         )
         
 ```
 
-*todo: Replace this screenshot!*
-
-![First stack edit](images/Cloud9_FristStackEdit.png)
+![First stack edit](images/Cloud9_FirstStackEdit.png)
 
 As you progress, you can test that your code generates valid CloudFormation by 
 running ```cdk synth``` But before you do this, you need to activate your python 
@@ -171,39 +183,60 @@ pip3 install -r requirements.txt
 
 ***Every time you work on your CDK project, you'll need to activate your virtualenv***
 
+If you haven't used CDK in this account before, run ```cdk bootstrap``` to prepare
+your account. This will create an S3 bucket to store a small amount of CDK resources.
+
+It should look like this:
+```
+(.env) admin:~/environment/python-cdk-locust/lab (master) $ cdk bootstrap
+   Bootstrapping environment aws://<account-id>/ap-southeast-2...
+CDKToolkit: creating CloudFormation changeset...
+ 0/3 | 4:57:10 AM | CREATE_IN_PROGRESS   | AWS::S3::Bucket       | StagingBucket 
+ 0/3 | 4:57:12 AM | CREATE_IN_PROGRESS   | AWS::S3::Bucket       | StagingBucket Resource creation Initiated
+ 1/3 | 4:57:34 AM | CREATE_COMPLETE      | AWS::S3::Bucket       | StagingBucket 
+ 1/3 | 4:57:36 AM | CREATE_IN_PROGRESS   | AWS::S3::BucketPolicy | StagingBucketPolicy 
+ 1/3 | 4:57:37 AM | CREATE_IN_PROGRESS   | AWS::S3::BucketPolicy | StagingBucketPolicy Resource creation Initiated
+ 2/3 | 4:57:37 AM | CREATE_COMPLETE      | AWS::S3::BucketPolicy | StagingBucketPolicy 
+ 3/3 | 4:57:39 AM | CREATE_COMPLETE      | AWS::CloudFormation::Stack | CDKToolkit 
+   Environment aws://<account-id>/ap-southeast-2 bootstrapped.
+```
+
+
 Now run ``` cdk synth``` to synthesize your CloudFormation template. You should 
 see a CloudFormation template several hunderd lines long defining your ECS 
-cluster and its dependecies. 
+cluster and its dependecies. This should take about 5 minutes to complete. 
+
 If you only see a metadata resource, you've forgotten to save you lab_stack.py file.
 
 
 ```
-(.env) Admin:~/environment/python-cdk-locust-lab/lab (master) $ cdk synth
+(.env) admin:~/environment/python-cdk-locust/lab (master) $ cdk synth
 Resources:
-  loadgenvpc044E9081:
+  LoadgenCluster881F169E:
+    Type: AWS::ECS::Cluster
+    Metadata:
+      aws:cdk:path: lab/Loadgen-Cluster/Resource
+  LoadgenClusterVpc73B88059:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: 10.7.1.0/24
+      CidrBlock: 10.0.0.0/16
       EnableDnsHostnames: true
       EnableDnsSupport: true
       InstanceTenancy: default
       Tags:
         - Key: Name
-          Value: python-cdk-locust-lab/loadgenvpc
-    Metadata:
-      aws:cdk:path: python-cdk-locust-lab/loadgenvpc/Resource
+          Value: lab/Loadgen-Cluster/Vpc
 ...
 ```
 
 You can now deploy your template by running ```cdk deploy``` 
 
 
-**todo:Change to the right path and screenshot!**
 
 ## Step 5: Create a container and task definition
 
-Now we've got our ECS cluster, we need something to run on it. We'll start by 
-defining a task definition
+Now that we've got our ECS cluster, we need something to run on it. We'll start 
+by defining a task definition
 ```
         task_def = ecs.Ec2TaskDefinition(self, "locustTask",
             network_mode=ecs.NetworkMode.AWS_VPC
@@ -220,7 +253,7 @@ We also set the environment variables that Locust requires to initialise here.
 ```
         locust_container = task_def.add_container(
             "locustContainer",
-            image=ecs.ContainerImage.from_asset("~/environment/python-cdk-locust-lab/locust"),
+            image=ecs.ContainerImage.from_asset("../locust"),
             memory_reservation_mib=512,
             essential=True,
             logging=ecs.LogDrivers.aws_logs(stream_prefix="cdkLocust"),
@@ -237,7 +270,7 @@ together into a service and run it on our ECS cluster. For this we'll use an ECS
 Pattern construct which not only creates the service, but automatically puts it 
 behind an Applicaion Load Balancer for us. 
 ```
-        Service = ecs_patterns.ApplicationLoadBalancedEc2Service(self, "Locust", 
+        locust_service = ecs_patterns.ApplicationLoadBalancedEc2Service(self, "Locust", 
             memory_reservation_mib=512, 
             task_definition=task_def, 
             cluster=loadgen_cluster
@@ -245,7 +278,7 @@ behind an Applicaion Load Balancer for us.
 ```
 
 
-As we're using a Pattern, that's all that is requires, as CDK uses the pattern to 
+As we're using a Pattern, that's all that is required, as CDK uses the pattern to 
 take care of the rest of the details. 
 
 Run ```cdk diff``` to see what changes this will make to the CloudFormation that CDK
@@ -256,14 +289,20 @@ deploy. When that completes, in a web browser go to the LocustServiceURL which
 is output at the end of the deploy process. You should see your Locust load 
 generator page.
 
+You can test this by entering your LocustServiceURL in the host field, and 1 
+for the number of users and hatch rate (Don't set it too high or you'll DoS 
+your instance!)
+
+[LocustUI](/images/Locust.png)
+
 ## Oops! We need a bigger instance!
 
-Imagine having just discovered that the t3.large instance we selected for our ECS
+Imagine having just discovered that the t3.micro instance we selected for our ECS
 cluster isn't adequate to handle the load we're generating. We need to move to a
 C5.large instance.
 
-With CDK, this is easy. Simply change the ```t3.large``` in your ecs cluster to
-```c5.large``` save the file, and redeploy.
+With CDK, this is easy. Simply change the ```t3.micro``` in your ecs cluster to
+```c5.large``` save the file, and redeploy with ```cdk deploy```.
 
 ## Monitoring
 Obviously, just having our service running is not enough, we need to monitor its
@@ -276,15 +315,12 @@ ALB.Start by creating the graph widgets based on metric objects which are proper
 of our ECS Cluster and ALB 
 
 ```
-        #Create a graph widget to track reservation metrics for our cluster
         ecs_widget = cw.GraphWidget(
-            left = [locust_service.metric_cpu_utilization()], 
-            right = [locust_service.metric_memory_utilization()],
-            title = "ECS Service - CPU and Memory Reservation",
+            left = [locust_service.service.metric_cpu_utilization()], 
+            right = [locust_service.service.metric_memory_utilization()],
+            title = "ECS Service - CPU and Memory Reservation"
+        )
             
-        
-        
-        # Create a graph widget for ALB
         alb_widget = cw.GraphWidget(
             left = [locust_service.load_balancer.metric_request_count()],
             right = [locust_service.load_balancer.metric_processed_bytes()],
