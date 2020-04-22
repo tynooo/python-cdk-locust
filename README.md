@@ -4,13 +4,13 @@
 
 This lab walks you through creating a CDK project in Python that will implement 
 an ECS Service running [Locust.io](https://locust.io/). Using CDK constructs 
-we'll create a customised Locust container image, and all supporting service configuration, including: VPC, 
+we'll create a customised Locust container image and all supporting service configuration, including: VPC, 
 ECS cluster, ECS Service, Application Load Balancer, and a CloudWatch dashboard.
 
 ## How much will this lab cost?
-Base costs will be:
-* Cloud9 and Locust instances
-* NAT Gateway
+Base costs will be ( $USD in ap-southeast-2):
+* Cloud9 and Locust instances $0.0132 per Hour each. 
+* NAT Gateway $0.059 per Hours plus $0.059 per GB processed.
 * Elastic Container Registry - Container storage
 * S3 - Used by CDK to store intermediate objects that CDK creates 
 
@@ -20,8 +20,8 @@ However, if you're eligible for [Free Tier](https://aws.amazon.com/free) and
 you select t3.micro instance type, your Cloud9 and Locust instances will be free. 
 
 If you use the results of this lab to load test a website outside of your own 
-VPC, keep in mind that there is a charge for data processed through NAT Gateway
-that can become quite substantial during a load test. 
+VPC, keep in mind that the charge for data processed through NAT Gateway can 
+become quite substantial during a load test. 
 
 ## Step 0: Getting Started
 
@@ -68,7 +68,7 @@ This will create a local copy of this repository that includes this README, and
 the Dockerfile and locust test file that we'll use. 
 
 
-2. Enter the lab directory and create a new directory for your work 
+2. Enter the python-cdk-locust directory and create a new directory for your work 
 ```
 cd python-cdk-locust
 mkdir lab
@@ -100,11 +100,11 @@ LabStack(app, "lab",
     env={'region': 'ap-southeast-2'}
 )
 ```
-**Remember to save your files after each step!**
+**Remember: Save your files after each step!**
 
 ## Step 3: Define your python dependencies
 Open the file named requirements.txt in your lab directory, replace the contents with 
-the following, and save it. This file defines the Python dependencies that our 
+the following, and save it. This file defines the Python libraries that our 
 lab will use. 
 ```
 aws-cdk.core
@@ -131,18 +131,18 @@ from aws_cdk import (
 
 In CDK there are 3 levels of construct:
 1. CFn Resources - These are constructs which are created directly from 
-CloudFormation and work in the same way as the CloudFrmation resource 
+CloudFormation and work in the same way as the CloudFormation resource 
 they're based upon, requiring you to explicitly configure all resource 
 properties, which requires a complete understanding of the details of the 
 underlying resource model.
-2. AWS constructs - The next level of constructs also represent AWS resources, 
+2. AWS Constructs - The next level of constructs also represent AWS resources, 
 but with a higher-level, intent-based API. AWS Constructs offer convenient 
 defaults and reduce the need to know all the details about the AWS resources they represent.
 3. Patterns - These constructs are designed to help you complete common tasks in 
 AWS, often involving multiple kinds of resources.
 
 You can find more information on CDK constructs in the CDK Developer Guide - 
-https://docs.aws.amazon.com/cdk/latest/guide/constructs.html
+[Constructs](https://docs.aws.amazon.com/cdk/latest/guide/constructs.html)
 
 In this lab we'll be using a Pattern from the ecs_patterns class
 called ApplicationLoadBalancedEc2Service. However, we'll create the ECS cluster
@@ -156,7 +156,7 @@ independently of the Pattern.
 Create an ECS cluster and add an instance to it. If we had specific requirements
 around the VPC configuration, we could have created a fresh one first, and passed
 it to the ECS cluster via the ```vpc``` parameter. Instead, we'll just let the 
-ECS construct create it for us.
+ECS Cluster construct create it for us.
 
 
 ```
@@ -317,15 +317,15 @@ of our ECS Cluster and ALB
 
 ```
         ecs_widget = cw.GraphWidget(
-            left = [locust_service.service.metric_cpu_utilization()], 
-            right = [locust_service.service.metric_memory_utilization()],
-            title = "ECS Service - CPU and Memory Reservation"
+            left=[locust_service.service.metric_cpu_utilization()], 
+            right=[locust_service.service.metric_memory_utilization()],
+            title="ECS Service - CPU and Memory Reservation"
         )
             
         alb_widget = cw.GraphWidget(
-            left = [locust_service.load_balancer.metric_request_count()],
-            right = [locust_service.load_balancer.metric_processed_bytes()],
-            title = "ALB - Requests and Throughput"
+            left=[locust_service.load_balancer.metric_request_count()],
+            right=[locust_service.load_balancer.metric_processed_bytes()],
+            title="ALB - Requests and Throughput"
         )
 ```
 
