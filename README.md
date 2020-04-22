@@ -9,27 +9,28 @@ ECS cluster, ECS Service, Application Load Balancer, and a CloudWatch dashboard.
 
 ## How much will this lab cost?
 Base costs will be:
-* Cloud9 instance
-* NAT GW
-* Locust Instance
+* Cloud9 and Locust instances
+* NAT Gateway
 * Elastic Container Registry - Container storage
 * S3 - Used by CDK to store intermediate objects that CDK creates 
 
 * You will need to manually delete resources in S3 and ECR after the lab *
 
 However, if you're eligible for [Free Tier](https://aws.amazon.com/free) and 
-you select t3.micro instance type, your Locust instance will be free. 
+you select t3.micro instance type, your Cloud9 and Locust instances will be free. 
 
+If you use the results of this lab to load test a website outside of your own 
+VPC, keep in mind that there is a charge for data processed through NAT Gateway
+that can become quite substantial during a load test. 
 
 ## Step 0: Getting Started
 
 In order to run this lab, you'll need a development environment with Python3 and
-CDK installed, and your AWS account bootstrapped for CDK. If you alread have this,
+CDK installed, and your AWS account bootstrapped for CDK. If you already have this,
 please skip to Step 1.
 
 First, open the Cloud9 console in the region in which you will complete this lab
-and create a new Environment.On the next screen, give it an appropriate name and
-hit "Next Step"
+and create a new Environment, give it an appropriate name and hit "Next Step"
 
 ![Cloud9 Name](/images/Cloud9_Create.png)
 
@@ -181,7 +182,7 @@ source .env/bin/activate
 pip3 install -r requirements.txt
 ```
 
-***Every time you work on your CDK project, you'll need to activate your virtualenv***
+***Remember:Every time you work on your CDK project, you'll need to activate your virtualenv***
 
 If you haven't used CDK in this account before, run ```cdk bootstrap``` to prepare
 your account. This will create an S3 bucket to store a small amount of CDK resources.
@@ -337,6 +338,12 @@ Now, we'll add them to a dashboard
 ```
 
 Save your file, and deploy the changes using ```cdk deploy```
+
+After a couple of minutes, when that's finished deploying, go to your CloudWatch 
+console, click "Dashboards" on the left, the click the dashboard starting with 
+"Locustdashboard". You should now see the graphs you just created.
+
+[CloudWatch Dashboard](/images/Dashboard.png)
 
 ## Cleanup
 
