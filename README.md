@@ -294,7 +294,7 @@ You can test this by entering your LocustServiceURL in the host field, and 1
 for the number of users and hatch rate (Don't set it too high or you'll DoS 
 your instance!)
 
-[LocustUI](/images/Locust.png)
+![LocustUI](/images/Locust.png)
 
 ## Oops! We need a bigger instance!
 
@@ -343,7 +343,7 @@ After a couple of minutes, when that's finished deploying, go to your CloudWatch
 console, click "Dashboards" on the left, the click the dashboard starting with 
 "Locustdashboard". You should now see the graphs you just created.
 
-[CloudWatch Dashboard](/images/Dashboard.png)
+![CloudWatch Dashboard](/images/Dashboard.png)
 
 ## Cleanup
 
