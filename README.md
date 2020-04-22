@@ -348,4 +348,11 @@ console, click "Dashboards" on the left, the click the dashboard starting with
 ## Cleanup
 
 Cleaning up in CDK is easy! Simply run ```cdk destroy``` and CDK will delete 
-all deployed resources
+all deployed resources.
+
+Delete your Cloud9 environment by going to the Cloud9 console, select your 
+environment, click the Delete button, and follow the prompts. 
+
+If you no longer intend to use CDK in your account, you can also delete your 
+bootstrap resources by going to the CloudFormation console and deleting the
+CDKToolkit stack.
