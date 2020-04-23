@@ -13,7 +13,9 @@ At a high level, the architecture will look like this:
 ## How much will this lab cost?
 Base costs will be ( $USD in ap-southeast-2):
 * Cloud9 and Locust instances $0.0132 per Hour each. 
-* 2 x NAT Gateway $0.059 per Hour plus $0.059 per GB processed.
+* 2 x NAT Gateway $0.059 per Hour plus $0.059 per GB processed
+* Application Load Balancer $0.0252 per hour plus $0.008per LCU-hour see
+[ELB Pricing](https://aws.amazon.com/elasticloadbalancing/pricing/) for details
 * Elastic Container Registry - Container storage
 * S3 - Used by CDK to store intermediate objects that CDK creates 
 
