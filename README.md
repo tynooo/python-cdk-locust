@@ -7,10 +7,13 @@ an ECS Service running [Locust.io](https://locust.io/). Using CDK constructs
 we'll create a customised Locust container image and all supporting service configuration, including: VPC, 
 ECS cluster, ECS Service, Application Load Balancer, and a CloudWatch dashboard.
 
+At a high level, the architecture will look like this:
+![Architecure](/images/Architecture.png)
+
 ## How much will this lab cost?
 Base costs will be ( $USD in ap-southeast-2):
 * Cloud9 and Locust instances $0.0132 per Hour each. 
-* NAT Gateway $0.059 per Hours plus $0.059 per GB processed.
+* 2 x NAT Gateway $0.059 per Hour plus $0.059 per GB processed.
 * Elastic Container Registry - Container storage
 * S3 - Used by CDK to store intermediate objects that CDK creates 
 
@@ -154,9 +157,11 @@ independently of the Pattern.
 *All code changes for the rest of the lab will be done in the file lab/lab_stack.py*
 
 Create an ECS cluster and add an instance to it. If we had specific requirements
-around the VPC configuration, we could have created a fresh one first, and passed
-it to the ECS cluster via the ```vpc``` parameter. Instead, we'll just let the 
-ECS Cluster construct create it for us.
+around the VPC configuration, we could have created a fresh one first and passed
+it to the ECS cluster via the ```vpc``` parameter, this would have allowed us to 
+specify details such as IP range and the maximum number of Availability Zones to 
+use (by default, it will create subnets and NAT Gateways in 2 AZs.) Instead, 
+we'll just let the ECS Cluster construct create it for us.
 
 
 ```
