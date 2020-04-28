@@ -186,11 +186,12 @@ we'll just let the ECS Cluster construct create it for us.
 
 As you progress, you can test that your code generates valid CloudFormation by 
 running ```cdk synth``` But before you do this, you need to activate your python 
-virtualenv and install your dependencies. 
+virtualenv, install your dependencies, and make sure CDK is up to date. 
 
 ```
 source .env/bin/activate
 pip3 install -r requirements.txt
+npm -g upgrade
 ```
 
 ***Remember:Every time you work on your CDK project, you'll need to activate your virtualenv***
@@ -257,8 +258,12 @@ by defining a task definition
 
 Now we'll add a container to run in our task. This container definition creates 
 a new container image based on a DOCKERFILE which references the official Locust.io 
-image on Dockerhub and accompanying locust.py file in the ```/locust``` directory. 
-CDK will then upload this to an ECR repository that it creates automatically.
+image on Dockerhub and accompanying locust.py file in the ```/locust``` directory.
+The locust.py file defines the set of tasks each "user" that Locust creates will 
+perform - you can find more information on how to write a locust.py file in the
+locust.io docs [here](https://docs.locust.io/en/stable/writing-a-locustfile.html)
+. CDK will then upload the image that it creates to an ECR repository that it
+creates automatically.
 
 We also set the environment variables that Locust requires to initialise here.
 
