@@ -149,8 +149,12 @@ AWS, often involving multiple kinds of resources.
 You can find more information on CDK constructs in the CDK Developer Guide - 
 [Constructs](https://docs.aws.amazon.com/cdk/latest/guide/constructs.html)
 
-In this lab we'll be using a Pattern from the ecs_patterns class
-called ApplicationLoadBalancedEc2Service. However, we'll create the ECS cluster
+In this lab we'll be using a Pattern from the 
+[aws_ecs_patterns](https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_ecs_patterns.README.html)
+class called
+[ApplicationLoadBalancedEc2Service](https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_ecs_patterns/ApplicationLoadBalancedEc2Service.html)
+. However, we'll create the 
+[ECS cluster](https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_ecs/Cluster.html)
 independently of the Pattern.
 
 
@@ -275,8 +279,10 @@ We also set the environment variables that Locust requires to initialise here.
 
 Now that we've created all of the underlying components, it's time to put them
 together into a service and run it on our ECS cluster. For this we'll use an ECS
-Pattern construct which not only creates the service, but automatically puts it 
-behind an Applicaion Load Balancer for us. 
+Pattern construct called
+[ApplicationLoadBalancedEc2Service](https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_ecs_patterns/ApplicationLoadBalancedEc2Service.html)
+which not only creates the service, but automatically puts it behind 
+an Applicaion Load Balancer for us. 
 ```
         locust_service = ecs_patterns.ApplicationLoadBalancedEc2Service(self, "Locust", 
             memory_reservation_mib=512, 
@@ -319,8 +325,11 @@ metrics for our service.
 
 Again, we can take advantage of the abstractions built into the CDK constructs. 
 We'll build a new dashboard and add graph widgets for both the ECS cluster and 
-ALB.Start by creating the graph widgets based on metric objects which are properties
-of our ECS Cluster and ALB 
+ALB. Start by creating the graph widgets based on metric objects which are properties
+of our 
+[ECS cluster](https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_ecs/Cluster.html)
+and 
+[ALB](https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_elasticloadbalancingv2/ApplicationLoadBalancer.html) 
 
 ```
         ecs_widget = cw.GraphWidget(
@@ -336,7 +345,11 @@ of our ECS Cluster and ALB
         )
 ```
 
-Now, we'll add them to a dashboard
+Now, we'll create a
+[CloudWatch Dashboard](https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_cloudwatch/Dashboard.html)
+using the
+[CloudWatch Construct](https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_cloudwatch.README.html)
+, and add them to a dashboard
 
 ```
         dashboard = cw.Dashboard(self, "Locustdashboard")
