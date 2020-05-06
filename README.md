@@ -2,6 +2,10 @@
 
 # Deploy a Locust load generator in ECS using CDK Python 
 
+This lab is provided as part of [AWS Summit Online](https://aws.amazon.com/events/summits/online/).
+
+ℹ️ You will run this lab in your own AWS account. Please follow directions at the end of the lab to remove resources to minimize costs.
+
 This lab walks you through creating a CDK project in Python that will implement 
 an ECS Service running [Locust.io](https://locust.io/). Using CDK constructs 
 we'll create a customised Locust container image and all supporting service configuration, including: VPC, 
@@ -12,7 +16,8 @@ At a high level, the architecture will look like this:
 
 ## How much will this lab cost?
 Base costs will be ( $USD in ap-southeast-2):
-* Cloud9 and Locust instances $0.0132 per Hour each. 
+* t3.micro Cloud9 and Locust instances $0.0132 per Hour each. 
+* c5.large Locust instance $0.111 per hour
 * 2 x NAT Gateway $0.059 per Hour plus $0.059 per GB processed
 * Application Load Balancer $0.0252 per hour plus $0.008per LCU-hour see
 [ELB Pricing](https://aws.amazon.com/elasticloadbalancing/pricing/) for details
@@ -22,7 +27,8 @@ Base costs will be ( $USD in ap-southeast-2):
 *You will need to manually delete resources in S3 and ECR after the lab*
 
 However, if you're eligible for [Free Tier](https://aws.amazon.com/free) and 
-you select t3.micro instance type, your Cloud9 and Locust instances will be free. 
+you select t2.micro or t3.micro instance type, depending on your region,
+your Cloud9 and Locust instances will be free. 
 
 If you use the results of this lab to load test a website outside of your own 
 VPC, keep in mind that the charge for data processed through NAT Gateway can 
@@ -39,8 +45,10 @@ and create a new Environment, give it an appropriate name and hit "Next Step"
 
 ![Cloud9 Name](/images/Cloud9_Create.png)
 
-On the next page, select your instance size, keeping in mind that larger instance 
-types will have a cost associated with them. Then hit "Next Step"
+On the next page, select your instance size (Free-Tier eligible instance types will be marked as such.)
+Keeping in mind that larger instance types will have a cost associated with them,
+and there is no nedd for significant processing power or memory,
+as this lab is very lightweight. Then hit "Next Step"
 
 ![Cloud9 Settings](/images/Cloud9_Settings.png)
 
@@ -216,8 +224,8 @@ CDKToolkit: creating CloudFormation changeset...
 
 
 Now run ``` cdk synth``` to synthesize your CloudFormation template. You should 
-see a CloudFormation template several hunderd lines long defining your ECS 
-cluster and its dependecies. This should take about 5 minutes to complete. 
+see a CloudFormation template several hundred lines long defining your ECS 
+cluster and its dependencies.  
 
 If you only see a metadata resource, you've forgotten to save you lab_stack.py file.
 
@@ -243,7 +251,7 @@ Resources:
 ```
 
 You can now deploy your template by running ```cdk deploy``` 
-
+This should take about 5 minutes to complete.
 
 
 ## Step 5: Create a container and task definition
@@ -380,4 +388,6 @@ environment, click the Delete button, and follow the prompts.
 
 If you no longer intend to use CDK in your account, you can also delete your 
 bootstrap resources by going to the CloudFormation console and deleting the
-CDKToolkit stack.
+CDKToolkit stack. This will delete the S3 bucket that CDK created for storing 
+temporary assets. Finally, go to the Elastic Container Repository console and
+delete the "aws-cdk/assets" repository.
