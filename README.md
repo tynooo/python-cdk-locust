@@ -2,7 +2,7 @@
 
 # Deploy a Locust load generator in ECS using CDK Python 
 
-This lab is provided as part of [AWS Summit Online](https://aws.amazon.com/events/summits/online/).
+This lab is provided as part of **[AWS Summit Online](https://aws.amazon.com/events/summits/online/)**, click [here](https://bit.ly/2yLtZqL) to explore the full list of hands-on labs.
 
 ℹ️ You will run this lab in your own AWS account. Please follow directions at the end of the lab to remove resources to minimize costs.
 
